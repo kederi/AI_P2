@@ -160,6 +160,42 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
+        def max_value(state, depth):
+            max_score = float("-inf")
+            return_action = Directions.STOP
+            for action in state.getLegalActions(self.index):
+                score = value(state.generateSuccessor(0, action), depth, 1)
+                if score > max_score:
+                    max_score = score
+                    return_action = action
+            if depth == 0:
+                return return_action
+            else:
+                return max_score
+
+        def min_value(state, depth, ghost_index):
+            score = float("inf")
+            for action in state.getLegalActions(ghost_index):
+                # if this is the last ghost, the next agent is pacman
+                if ghost_index == state.getNumAgents() - 1:
+                    score = min(value(state.generateSuccessor(ghost_index, action), depth + 1, 0), score)
+                else:
+                    score = min(value(state.generateSuccessor(ghost_index, action), depth, ghost_index + 1), score)
+            return score
+
+        def value(state, depth, agent):
+            if gameState.isWin() or gameState.isLose():
+                return self.evaluationFunction(state)
+            elif 0 < agent < state.getNumAgents():
+                return min_value(state, depth, agent)
+            else:
+                if depth == self.depth:
+                    return self.evaluationFunction(state)
+                else:
+                    return max_value(state, depth)
+
+        return value(gameState, 0, 0)
+
         # Make sure to create two helper functions for Min and Max
         # Min is the Ghost agents and Max is PacMan
         # For the Max would want to loop while we have 
