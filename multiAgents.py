@@ -78,26 +78,27 @@ class ReflexAgent(Agent):
         #print(newGhostStates)
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
+        food_list = successorGameState.getFood().asList()
         "*** YOUR CODE HERE ***"
-
-
+        if(successorGameState.isWin()):
+            return 100000000
         # To begin write a simple evaluation function in which PacMan just avoids death
         # TODO
         # Get the Manhattan Distance between PacMan and the Ghosts
-        list_dist = []
         for state in newGhostStates:
             man_distGhost = manhattanDistance(newPos, state.getPosition())
             # Check if its the min distance to pac man
-            list_dist.append(man_distGhost)
+            # CHANGE
+            if(state.scaredTimer == 0 and man_distGhost < 3):
+                return -1000000
+        ## Need to get the closest pellet
+        list_food = []
+        for dot in food_list:
+            list_food.append(manhattanDistance(newPos, dot))
 
-        index = min(list_dist)
-        if index < 3:
-            return -100000
-
-
-
-
-        return successorGameState.getScore()
+        val = min(list_food)
+        print(val)
+        return successorGameState.getScore() + 1/val
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -159,6 +160,9 @@ class MinimaxAgent(MultiAgentSearchAgent):
         """
         "*** YOUR CODE HERE ***"
 
+        # Make sure to create two helper functions for Min and Max
+        # Min is the Ghost agents and Max is PacMan
+        # For the Max would want to loop while we have 
 
         util.raiseNotDefined()
 
@@ -172,6 +176,14 @@ class AlphaBetaAgent(MultiAgentSearchAgent):
         Returns the minimax action using self.depth and self.evaluationFunction
         """
         "*** YOUR CODE HERE ***"
+        alpha = 0
+        beta = 0
+        def max_value(gameState, alpha, beta):
+            v = float('inf')
+
+        def min_value(gameState, alpha, beta):
+            v = float('inf')
+
         util.raiseNotDefined()
 
 class ExpectimaxAgent(MultiAgentSearchAgent):
