@@ -75,22 +75,26 @@ class ReflexAgent(Agent):
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
         "*** YOUR CODE HERE ***"
-        if successorGameState.isWin():
-            return 1000000
-
-        # calculate pacman's disance to ghosts and return a large negative number if any are within 3 units
-        for state in newGhostStates:
-            ghost_dist = manhattanDistance(newPos, state.getPosition())
-            if ghost_dist < 3:
-                return -1000000
-
-        # Get the distance to the closest pellet
         food_list = successorGameState.getFood().asList()
-        food_dists = []
-        for dot in food_list:
-            food_dists.append(manhattanDistance(newPos, dot))
 
-        return successorGameState.getScore() + 1 / min(food_dists)
+        if (successorGameState.isWin()):
+            return 100000000
+        # To begin write a simple evaluation function in which PacMan just avoids death
+        # TODO
+        # Get the Manhattan Distance between PacMan and the Ghosts
+        for state in newGhostStates:
+            man_distGhost = manhattanDistance(newPos, state.getPosition())
+            # Check if its the min distance to pac man
+            # CHANGE
+            if (state.scaredTimer == 0 and man_distGhost < 3):
+                return -1000000
+        ## Need to get the closest pellet
+        list_food = []
+        for dot in food_list:
+            list_food.append(manhattanDistance(newPos, dot))
+
+        val = min(list_food)
+        return successorGameState.getScore() + 1 / val
 
 
 def scoreEvaluationFunction(currentGameState):
