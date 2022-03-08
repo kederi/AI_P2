@@ -69,36 +69,29 @@ class ReflexAgent(Agent):
         """
         # Useful information you can extract from a GameState (pacman.py)
         successorGameState = currentGameState.generatePacmanSuccessor(action)
-        #print(successorGameState)
         newPos = successorGameState.getPacmanPosition()
-        #print(newPos)
         newFood = successorGameState.getFood()
-        #print(newFood)
         newGhostStates = successorGameState.getGhostStates()
-        #print(newGhostStates)
         newScaredTimes = [ghostState.scaredTimer for ghostState in newGhostStates]
 
-        food_list = successorGameState.getFood().asList()
         "*** YOUR CODE HERE ***"
-        if(successorGameState.isWin()):
-            return 100000000
-        # To begin write a simple evaluation function in which PacMan just avoids death
-        # TODO
-        # Get the Manhattan Distance between PacMan and the Ghosts
-        for state in newGhostStates:
-            man_distGhost = manhattanDistance(newPos, state.getPosition())
-            # Check if its the min distance to pac man
-            # CHANGE
-            if(state.scaredTimer == 0 and man_distGhost < 3):
-                return -1000000
-        ## Need to get the closest pellet
-        list_food = []
-        for dot in food_list:
-            list_food.append(manhattanDistance(newPos, dot))
+        if successorGameState.isWin():
+            return 1000000
 
-        val = min(list_food)
-        print(val)
-        return successorGameState.getScore() + 1/val
+        # calculate pacman's disance to ghosts and return a large negative number if any are within 3 units
+        for state in newGhostStates:
+            ghost_dist = manhattanDistance(newPos, state.getPosition())
+            if ghost_dist < 3:
+                return -1000000
+
+        # Get the distance to the closest pellet
+        food_list = successorGameState.getFood().asList()
+        food_dists = []
+        for dot in food_list:
+            food_dists.append(manhattanDistance(newPos, dot))
+
+        return successorGameState.getScore() + 1 / min(food_dists)
+
 
 def scoreEvaluationFunction(currentGameState):
     """
@@ -304,7 +297,7 @@ class ExpectimaxAgent(MultiAgentSearchAgent):
                 return exp_value(state, depth, agent)
 
         return value(gameState, 0, 0)
-    
+
 def betterEvaluationFunction(currentGameState):
     """
     Your extreme ghost-hunting, pellet-nabbing, food-gobbling, unstoppable
@@ -313,7 +306,41 @@ def betterEvaluationFunction(currentGameState):
     DESCRIPTION: <write something here so we know what you did>
     """
     "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    pos = currentGameState.getPacmanPosition()
+    food_list = currentGameState.getFood().asList()
+    ghost_states = currentGameState.getGhostStates()
+    score = currentGameState.getScore()
+
+    # find distance to closest ghost
+    ghost_dist = []
+    for ghost in ghost_states:
+        ghost_dist.append(manhattanDistance(pos, ghost.getPosition()))
+    ghost_dist.sort()
+    closest_ghost = min(ghost_dist)
+
+
+    # find distance to closest food
+    food_dist = []
+    avg_food = -1
+    closest_food = -1
+    if len(food_list) > 0:
+        for dot in food_list:
+            food_dist.append(manhattanDistance(pos, dot))
+        closest_food = min(food_dist)
+        if len(food_list) > 1:
+             avg_food = sum(food_dist)/len(food_dist)
+
+    if 0 <= closest_food < closest_ghost - 1 or closest_food < 5:
+        score *= 2
+    if closest_ghost > 5:
+        score *= 1.75
+    if avg_food > 5:
+        score -= avg_food
+    score -= closest_food
+
+    return score
+
+
 
 # Abbreviation
 better = betterEvaluationFunction
